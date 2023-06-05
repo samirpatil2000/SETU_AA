@@ -3,8 +3,6 @@ from rest_framework import generics
 from django.views import View
 from django.http import JsonResponse
 
-import requests
-import json
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -20,10 +18,6 @@ class CustomView(mixins.RetrieveModelMixin, mixins.ListModelMixin, mixins.Create
         abstract = True
 
 
-def hello_world(request):
-    if request.method == 'POST':
-        return Response({"message": "Got some data!", "data": request.data})
-    return Response({"message": "Hello, world!"})
 
 @api_view(['GET', 'POST'])
 def create_custom_post(request):
@@ -31,12 +25,10 @@ def create_custom_post(request):
         return Response({"message": "Got some data!"})
     if request.method == 'POST':
         consent_handler = ConsentHandler()
-        create_consent_response = consent_handler.create_consent()
+        create_consent_response = consent_handler.create_consent(phone_number="9730614299")
         if create_consent_response.get("status") == 1:
             return Response({"message": "Consent Created Successfully", "data": create_consent_response.get("data")})
         return Response({"message": "something went wrong"})
-
-
 
 
 class DataSessionView(CustomView):
