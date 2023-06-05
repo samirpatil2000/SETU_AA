@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     # local apps
     'account',
+    'setu',
 
     # third party apps
     'rest_framework',
