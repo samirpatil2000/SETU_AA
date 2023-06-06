@@ -3,12 +3,24 @@ import json
 from rest_framework.decorators import api_view
 from rest_framework.response import  Response
 from setu.constants import ConsentStatus, SessionStatus
+from setu.handles.data_session_handler import DataSessionHandler
 from setu.models import Consent, Sessions
 from rest_framework import status
 
+
+
 @api_view(["POST"])
-def consent_notification(request):
+def set_notification_handler(request):
     payload = request.data
+    notification_type = payload.get("type")
+    if notification_type == "CONSENT_STATUS_UPDATE":
+        return consent_notification(payload)
+    elif notification_type == "SESSION_STATUS_UPDATE":
+        return session_notification(payload)
+    return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Invalid Type"})
+
+
+def consent_notification(payload):
     consent_id = payload.get("consentId")
     success = payload.get("success", False)
     data = payload.get("data")
@@ -16,12 +28,14 @@ def consent_notification(request):
         consent = Consent.objects.get(consent_id=consent_id)
         consent.status = data.get("status")
         consent.save()
+
+        # TODO: Async Await
+        DataSessionHandler().create_session_api(consent_id)
+
     return Response(status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
-def session_notification(request):
-    payload = request.data
+def session_notification(payload):
     session_id = payload.get("id")
     consent_id = payload.get("consentId")
     status = payload.get("status")
@@ -32,4 +46,5 @@ def session_notification(request):
         data_session.status = status
         data_session.data = json.dumps(data)
         data_session.save()
+
     return Response(status=status.HTTP_200_OK)

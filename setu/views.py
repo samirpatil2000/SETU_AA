@@ -13,33 +13,33 @@ from setu.handles.data_session_handler import DataSessionHandler
 from setu.models import Consent
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def create_consent_view(request):
     if request.method == "GET":
         return Response({"message": "Got some data!"})
     if request.method == 'POST':
         payload = request.data
         create_consent_response = ConsentHandler().create_consent_api(phone_number="9730614299")
+
         if create_consent_response.get("status") == 1:
-            return Response({"message": "Consent Created Successfully", "data": create_consent_response.get("data")})
+            # Create data sessions
+            data = create_consent_response.get("data")
+            consent_id = data.get("id")
+            create_data_session_view(consent_id)
+            return Response({"message": "Consent Created Successfully", "data": data})
         # TODO: Status Codes, proper error messages
         return Response({"message": "something went wrong"})
 
 
-@api_view(["GET", "POST"])
-def create_data_session_view(request):
-    if request.method == "GET":
-        return Response({"message": "Got Some Data!"})
-    if request.method == "POST":
-        payload = request.data
-        consent_object = Consent.objects.get(consent_id=payload["consentId"])
-        if consent_object.status == ConsentStatus.ACTIVE.name:
-            create_data_session_response = DataSessionHandler().create_session_api(consentId=payload["consentId"])
-            if create_data_session_response.get("status") == 1:
-                return Response({"message": "Data Session Created Successfully", "data": create_data_session_response.get("data")})
-            # TODO: Status Codes, proper error messages
-            return Response({"message": create_data_session_response["error"].get("error_message")})
-        return Response({"message": "Consent Not Approved Yet"})
+def create_data_session_view(consent_id):
+    consent_object = Consent.objects.get(consent_id)
+    if consent_object.status == ConsentStatus.ACTIVE.name:
+        create_data_session_response = DataSessionHandler().create_session_api(consent_id)
+        if create_data_session_response.get("status") == 1:
+            return Response({"message": "Data Session Created Successfully", "data": create_data_session_response.get("data")})
+        # TODO: Status Codes, proper error messages
+        return Response({"message": create_data_session_response["error"].get("error_message")})
+    return Response({"message": "Consent Not Approved Yet"})
 
 
 

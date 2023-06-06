@@ -4,6 +4,9 @@ import requests
 from setu.constants import SETU_API_ENDPOINT, SETU_API_HEADERS
 from setu.models import Sessions, Consent
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class DataSessionHandler:
     DATA_SESSION_API_ENDPOINT = "sessions"
@@ -14,20 +17,27 @@ class DataSessionHandler:
         payload = json.dumps({
             "consentId": consentId,
             "DataRange": {
-                "from": "2021-04-01T00:00:00Z",
-                "to": "2021-09-30T00:00:00Z"
+                "from": "2023-06-06T00:00:00.000Z",
+                "to": "2023-06-08T00:00:00.000Z"
             },
             "format": "json"
         })
-
+        logger.info("create_session_api: request consent session api request => {}".format(payload))
         response = requests.request("POST", url, headers=SETU_API_HEADERS, data=payload)
+        logger.info("create_session_api: response consent session api response => {}".format(response))
         data = json.loads(response.text)
+        print(data)
         if response.status_code == 201:
-            self.create_session(data)
+            self._create_session(data)
             return {"status": 1, "data": {}}
-        return {"status": 0, "error": {"error_code":data.get("errorCode"), "error_message": data.get("errorMsg")}}
+        return {"status": 0, "error": {"error_code": data.get("errorCode"), "error_message": data.get("errorMsg")}}
 
-    def create_session(self, data):
+
+    def fetch_data_session(self, session_id):
+        url = SETU_API_ENDPOINT + self.DATA_SESSION_API_ENDPOINT + "/" + session_id
+
+
+    def _create_session(self, data):
         consent_object = Consent.objects.get(consent_id=data["consentId"])
         return Sessions.objects.create(
             sessions_id=data["id"],

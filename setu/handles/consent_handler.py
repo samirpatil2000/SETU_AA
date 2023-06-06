@@ -4,8 +4,10 @@ import requests
 import pdb
 
 from setu.constants import SETU_API_ENDPOINT, SETU_API_HEADERS
-from setu.models import Consent
+from setu.models import Consent, User
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ConsentHandler:
 
@@ -16,14 +18,14 @@ class ConsentHandler:
 
         payload = json.dumps({
             "Detail": {
-                "consentStart": "2023-06-05T18:17:14.882Z",
-                "consentExpiry": "2023-06-23T05:44:53.822Z",
+                "consentStart": "2023-06-06T14:13:09.303Z",
+                "consentExpiry": "2023-06-08T05:44:53.822Z",
                 "Customer": {
-                    "id": phone_number + "@onemoney"
+                    "id": "9730614299@onemoney"
                 },
                 "FIDataRange": {
-                    "from": "2021-06-04T00:00:00Z",
-                    "to": "2021-06-10T00:00:00Z"
+                    "from": "2023-06-06T00:00:00Z",
+                    "to": "2023-06-08T00:00:00Z"
                 },
                 "consentMode": "STORE",
                 "consentTypes": [
@@ -65,13 +67,17 @@ class ConsentHandler:
             "context": [
                 {
                     "key": "accounttype",
-                    "value": "CURRENT"
+                    "value": "SAVINGS"
                 }
             ],
             "redirectUrl": "https://setu.co"
         })
 
+        logger.info("create_session_api: request consent create api request => {}".format(payload))
         response = requests.request("POST", url, headers=SETU_API_HEADERS, data=payload)
+        logger.info("create_session_api: request consent create api request => {}".format(payload))
+
+        print(response.text)
         if response.status_code == 201:
             data = json.loads(response.text)
             self._create_consent(data, phone_number)
@@ -79,9 +85,10 @@ class ConsentHandler:
         return {"status": 0}
 
     def _create_consent(self, data, phone_number):
+        user = User.objects.get(phone_number=phone_number)
         return Consent.objects.create(
             consent_id=data.get("id"),
             redirect_url=data.get("url"),
             status=data.get("status"),
-            phone_number=phone_number
+            user_id=user.id
         )
