@@ -21,7 +21,7 @@ class ConsentHandler:
                 "consentStart": "2023-06-06T14:13:09.303Z",
                 "consentExpiry": "2023-06-08T05:44:53.822Z",
                 "Customer": {
-                    "id": "9730614299@onemoney"
+                    "id": phone_number + "@onemoney"
                 },
                 "FIDataRange": {
                     "from": "2023-06-06T00:00:00Z",

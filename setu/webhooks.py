@@ -10,7 +10,7 @@ from rest_framework import status
 
 
 @api_view(["POST"])
-def set_notification_handler(request):
+def notification_handler(request):
     payload = request.data
     notification_type = payload.get("type")
     if notification_type == "CONSENT_STATUS_UPDATE":

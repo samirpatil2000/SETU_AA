@@ -21,7 +21,7 @@ class User(BaseModel):
 
 class Consent(BaseModel):
     consent_id = models.CharField(max_length=40, unique=True, db_index=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=10)
     redirect_url = models.CharField(max_length=100)
 
@@ -31,7 +31,7 @@ class Consent(BaseModel):
 
 class Sessions(BaseModel):
     sessions_id = models.CharField(max_length=40, unique=True, db_index=True)
-    consent = models.ForeignKey(Consent, on_delete=models.CASCADE)
+    consent = models.OneToOneField(Consent, on_delete=models.CASCADE)
     status = models.CharField(max_length=10)
     data = models.TextField(blank=True, null=True)
 

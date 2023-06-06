@@ -8,6 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class DataSessionHandler:
     DATA_SESSION_API_ENDPOINT = "sessions"
 
@@ -22,19 +23,15 @@ class DataSessionHandler:
             },
             "format": "json"
         })
-        logger.info("create_session_api: request consent session api request => {}".format(payload))
+        logger.info("create_session_api: create consent session api request => {}".format(payload))
         response = requests.request("POST", url, headers=SETU_API_HEADERS, data=payload)
-        logger.info("create_session_api: response consent session api response => {}".format(response))
+        logger.info("create_session_api: create consent session api response => {}".format(response))
         data = json.loads(response.text)
         print(data)
         if response.status_code == 201:
             self._create_session(data)
             return {"status": 1, "data": {}}
         return {"status": 0, "error": {"error_code": data.get("errorCode"), "error_message": data.get("errorMsg")}}
-
-
-    def fetch_data_session(self, session_id):
-        url = SETU_API_ENDPOINT + self.DATA_SESSION_API_ENDPOINT + "/" + session_id
 
 
     def _create_session(self, data):
