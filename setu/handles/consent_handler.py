@@ -3,26 +3,16 @@ from typing import final
 import requests
 import pdb
 
+from setu.constants import SETU_API_ENDPOINT, SETU_API_HEADERS
 from setu.models import Consent
-
-X_CLIENT_ID = "255d0b6c-492d-44cf-8581-e9494c7b0914"
-X_CLIENT_SECRET = "9c2fc756-3d17-46d6-b28d-be4d71953e83"
-
-headers = {
-    'x-client-id': '255d0b6c-492d-44cf-8581-e9494c7b0914',
-    'x-client-secret': '9c2fc756-3d17-46d6-b28d-be4d71953e83',
-    'Content-Type': 'application/json'
-}
-
-
-SETU_API_END_POINT: final(str) = "https://fiu-uat.setu.co/"
-CONSENT_API_END_POINT: final(str) = "consents"
 
 
 class ConsentHandler:
 
+    CONSENT_API_END_POINT: final(str) = "consents"
+
     def create_consent_api(self, phone_number):
-        url = SETU_API_END_POINT + CONSENT_API_END_POINT
+        url = SETU_API_ENDPOINT + self.CONSENT_API_END_POINT
 
         payload = json.dumps({
             "Detail": {
@@ -81,14 +71,14 @@ class ConsentHandler:
             "redirectUrl": "https://setu.co"
         })
 
-        response = requests.request("POST", url, headers=headers, data=payload)
+        response = requests.request("POST", url, headers=SETU_API_HEADERS, data=payload)
         if response.status_code == 201:
             data = json.loads(response.text)
-            self.create_consent(data, phone_number)
+            self._create_consent(data, phone_number)
             return {"status": 1, "data" : {"redirect_url": data.get("url"), "id": data.get("id")}}
         return {"status": 0}
 
-    def create_consent(self, data, phone_number):
+    def _create_consent(self, data, phone_number):
         return Consent.objects.create(
             consent_id=data.get("id"),
             redirect_url=data.get("url"),

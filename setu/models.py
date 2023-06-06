@@ -21,3 +21,10 @@ class Consent(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=10)
     redirect_url = models.CharField(max_length=100)
+
+
+class Sessions(BaseModel):
+    sessions_id = models.CharField(max_length=40, unique=True, db_index=True)
+    consent = models.ForeignKey(Consent, on_delete=models.CASCADE)
+    status = models.CharField(max_length=10)
+    data = models.TextField(blank=True, null=True)

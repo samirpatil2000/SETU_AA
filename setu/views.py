@@ -7,53 +7,39 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from setu.handles.consent_api import ConsentHandler
-
-
-class CustomView(mixins.RetrieveModelMixin, mixins.ListModelMixin, mixins.CreateModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.DestroyModelMixin,
-                 generics.GenericAPIView):
-    class AbstractClass:
-        abstract = True
-
+from setu.constants import ConsentStatus
+from setu.handles.consent_handler import ConsentHandler
+from setu.handles.data_session_handler import DataSessionHandler
+from setu.models import Consent
 
 
 @api_view(['GET', 'POST'])
-def create_custom_post(request):
+def create_consent_view(request):
     if request.method == "GET":
         return Response({"message": "Got some data!"})
     if request.method == 'POST':
-        consent_handler = ConsentHandler()
-        create_consent_response = consent_handler.create_consent(phone_number="9730614299")
+        payload = request.data
+        create_consent_response = ConsentHandler().create_consent_api(phone_number="9730614299")
         if create_consent_response.get("status") == 1:
             return Response({"message": "Consent Created Successfully", "data": create_consent_response.get("data")})
+        # TODO: Status Codes, proper error messages
         return Response({"message": "something went wrong"})
 
 
-class DataSessionView(CustomView):
-    def get(self, request):
-        # Implement the logic to handle GET requests for data session
-        # using the SETU Account Aggregator API
-        # Return the response as a JSON
-        return JsonResponse({'status': 'GET request for data session'})
+@api_view(["GET", "POST"])
+def create_data_session_view(request):
+    if request.method == "GET":
+        return Response({"message": "Got Some Data!"})
+    if request.method == "POST":
+        payload = request.data
+        consent_object = Consent.objects.get(consent_id=payload["consentId"])
+        if consent_object.status == ConsentStatus.ACTIVE.name:
+            create_data_session_response = DataSessionHandler().create_session_api(consentId=payload["consentId"])
+            if create_data_session_response.get("status") == 1:
+                return Response({"message": "Data Session Created Successfully", "data": create_data_session_response.get("data")})
+            # TODO: Status Codes, proper error messages
+            return Response({"message": create_data_session_response["error"].get("error_message")})
+        return Response({"message": "Consent Not Approved Yet"})
 
-    def post(self, request):
-        # Implement the logic to handle POST requests for data session
-        # using the SETU Account Aggregator API
-        # Return the response as a JSON
-        return JsonResponse({'status': 'POST request for data session'})
 
 
-class SampleDataView(CustomView):
-    def get(self, request):
-        # Implement the logic to handle GET requests for sample data
-        # using the SETU Account Aggregator API
-        # Return the response as a JSON
-        return JsonResponse({'status': 'GET request for sample data'})
-
-    def post(self, request):
-        # Implement the logic to handle POST requests for sample data
-        # using the SETU Account Aggregator API
-        # Return the response as a JSON
-        return JsonResponse({'status': 'POST request for sample data'})
