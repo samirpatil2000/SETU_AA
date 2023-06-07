@@ -74,4 +74,5 @@ The project will be available at **127.0.0.1:8000**.
     ```
    
 ### SEQUENCE DIAGRAM
-![Screenshot 2023-06-07 at 7 16 20 PM](https://github.com/samirpatil2000/SETU_AA/assets/55244065/07148870-0330-4b6d-9c18-d887c0c1a317)
+![Screenshot 2023-06-07 at 7 16 20 PM](https://github.com/samirpatil2000/SETU_AA/assets/55244065/a0b0ce4a-c958-43dd-945a-3f44e316d2c6)
+
