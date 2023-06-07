@@ -17,9 +17,9 @@ class DataSessionHandler:
 
         payload = json.dumps({
             "consentId": consentId,
-            "DataRange": {
-                "from": "2023-06-06T00:00:00.000Z",
-                "to": "2023-06-08T00:00:00.000Z"
+            "DataRange":{
+                "from": "2023-04-01T00:00:00Z",
+                "to": "2023-04-08T00:00:00Z"
             },
             "format": "json"
         })
@@ -33,6 +33,20 @@ class DataSessionHandler:
             return {"status": 1, "data": {}}
         return {"status": 0, "error": {"error_code": data.get("errorCode"), "error_message": data.get("errorMsg")}}
 
+    def fetch_session_data(self, session_id):
+        url = "https://fiu-uat.setu.co/sessions/" + session_id
+        response = requests.request("GET", url, headers=SETU_API_HEADERS)
+        data = json.loads(response.text)
+        print(data)
+        if response.status_code == 200:
+            self._update_session(data, session_id)
+            return {"status": 1, "data": {}}
+        return {"status": 0, "error": {"error_code": data.get("errorCode"), "error_message": data.get("errorMsg")}}
+
+    def _update_session(self, data, session_id):
+        session_object = Sessions.objects.get(sessions_id=session_id)
+        session_object.session_data = data.get("Payload")
+        session_object.save()
 
     def _create_session(self, data):
         consent_object = Consent.objects.get(consent_id=data["consentId"])

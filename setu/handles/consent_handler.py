@@ -6,8 +6,12 @@ import pdb
 from setu.constants import SETU_API_ENDPOINT, SETU_API_HEADERS
 from setu.models import Consent, User
 import logging
+from datetime import datetime
+
 
 logger = logging.getLogger(__name__)
+
+
 
 class ConsentHandler:
 
@@ -15,17 +19,17 @@ class ConsentHandler:
 
     def create_consent_api(self, phone_number):
         url = SETU_API_ENDPOINT + self.CONSENT_API_END_POINT
-
+        current_datetime = datetime.now().isoformat()
         payload = json.dumps({
             "Detail": {
-                "consentStart": "2023-06-06T14:13:09.303Z",
-                "consentExpiry": "2023-06-08T05:44:53.822Z",
+                "consentStart": str(current_datetime[:-3]) + "Z",
+                "consentExpiry": "2023-06-23T05:44:53.822Z",
                 "Customer": {
                     "id": phone_number + "@onemoney"
                 },
                 "FIDataRange": {
-                    "from": "2023-06-06T00:00:00Z",
-                    "to": "2023-06-08T00:00:00Z"
+                    "from": "2023-04-01T00:00:00Z",
+                    "to": "2023-04-08T00:00:00Z"
                 },
                 "consentMode": "STORE",
                 "consentTypes": [
@@ -85,10 +89,10 @@ class ConsentHandler:
         return {"status": 0}
 
     def _create_consent(self, data, phone_number):
-        user = User.objects.get(phone_number=phone_number)
+        obj, created = User.objects.get_or_create(phone_number=phone_number)
         return Consent.objects.create(
             consent_id=data.get("id"),
             redirect_url=data.get("url"),
             status=data.get("status"),
-            user_id=user.id
+            user_id=obj.id
         )
