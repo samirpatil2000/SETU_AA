@@ -33,8 +33,16 @@ class DataSessionHandler:
             return {"status": 1, "data": {}}
         return {"status": 0, "error": {"error_code": data.get("errorCode"), "error_message": data.get("errorMsg")}}
 
+    def _create_session(self, data):
+        consent_object = Consent.objects.get(consent_id=data["consentId"])
+        return Sessions.objects.create(
+            sessions_id=data["id"],
+            consent_id=consent_object.id,
+            status=data["status"]
+        )
+
     def fetch_session_data(self, session_id):
-        url = "https://fiu-uat.setu.co/sessions/" + session_id
+        url = SETU_API_ENDPOINT + self.DATA_SESSION_API_ENDPOINT + "/" + session_id
         response = requests.request("GET", url, headers=SETU_API_HEADERS)
         data = json.loads(response.text)
         print(data)
@@ -45,13 +53,5 @@ class DataSessionHandler:
 
     def _update_session(self, data, session_id):
         session_object = Sessions.objects.get(sessions_id=session_id)
-        session_object.session_data = data.get("Payload")
+        session_object.session_data = json.dumps(data.get("Payload")[0])
         session_object.save()
-
-    def _create_session(self, data):
-        consent_object = Consent.objects.get(consent_id=data["consentId"])
-        return Sessions.objects.create(
-            sessions_id=data["id"],
-            consent_id=consent_object.id,
-            status=data["status"]
-        )
